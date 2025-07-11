@@ -1,35 +1,36 @@
 <template>
   <div>
-    <a-upload
-      v-model:file-list="fileList"
-      :custom-request="customUpload"
-      :before-upload="beforeUpload"
-      @change="handleChange"
-      :multiple="true"
-      :accept="acceptTypes"
-    >
-      <a-button>
-        <upload-outlined />
-        Subir archivo (fotos, PDF, DOC...)
-      </a-button>
-    </a-upload>
+    <h1>xdxdxd</h1>
+    <a-button @click="triggerNativeInput">
+      <upload-outlined /> Subir archivo
+    </a-button>
+
+    <!-- input nativo oculto que sí funciona bien en móviles -->
+    <input
+      ref="realInput"
+      type="file"
+      :accept="accept"
+      multiple
+      style="display: none"
+      @change="handleNativeUpload"
+    />
+
+    <ul>
+      <li v-for="file in fileList" :key="file.name">{{ file.name }}</li>
+    </ul>
   </div>
 </template>
 
 <script>
-import { UploadOutlined } from '@ant-design/icons-vue'
 import { defineComponent, ref } from 'vue'
-import { message } from 'ant-design-vue'
+import { UploadOutlined } from '@ant-design/icons-vue'
 
 export default defineComponent({
-  components: {
-    UploadOutlined,
-  },
+  components: { UploadOutlined },
   setup() {
     const fileList = ref([])
-
-    // Acepta imágenes, PDF, Word, texto, etc.
-    const acceptTypes = [
+    const realInput = ref(null)
+    const accept = [
       'image/*',
       'application/pdf',
       'application/msword',
@@ -37,40 +38,23 @@ export default defineComponent({
       'text/plain'
     ].join(',')
 
-    // 🔧 Personalizar subida para evitar problemas móviles
-    const customUpload = ({ file, onSuccess }) => {
-      // Simular subida con un timeout
-      setTimeout(() => {
-        const fakeUrl = URL.createObjectURL(file)
-        fileList.value.push({
-          uid: `${Date.now()}`,
-          name: file.name,
-          status: 'done',
-          url: fakeUrl,
-        })
-        onSuccess("ok")
-      }, 500)
+    const triggerNativeInput = () => {
+      realInput.value?.click()
     }
 
-    const beforeUpload = (file) => {
-      const isValid = acceptTypes.includes(file.type) || file.type.startsWith("image/")
-      if (!isValid) {
-        message.error(`${file.name} no es un archivo válido`)
-      }
-      return isValid
-    }
-
-    const handleChange = ({ fileList: newList }) => {
-      fileList.value = newList
+    const handleNativeUpload = (e) => {
+      const files = Array.from(e.target.files)
+      fileList.value = files
+      console.log('Archivos seleccionados:', files)
     }
 
     return {
       fileList,
-      acceptTypes,
-      beforeUpload,
-      handleChange,
-      customUpload,
+      accept,
+      realInput,
+      triggerNativeInput,
+      handleNativeUpload,
     }
-  },
+  }
 })
 </script>
