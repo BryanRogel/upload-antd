@@ -1,46 +1,52 @@
 <template>
-  <a-upload
-    v-model:file-list="fileList"
-    name="file"
-    action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-    :headers="headers"
-    @change="handleChange"
-    :capture="null"
-
-  >
-    <a-button>
-      <upload-outlined></upload-outlined>
-      Click to Upload
-    </a-button>
-  </a-upload>
+  <div>
+    <h4 style="color: var(--black) !important;">{{ title }}</h4>
+    <div class="mb-3">{{ description }}</div>
+    <a-upload 
+      list-type="picture"
+      :fileList="files" 
+      :multiple="multiple"
+      :before-upload="beforeUpload"
+      @remove="handleRemove"
+      :capture="null"
+    >
+      <a-button class="mt-2">
+        <upload-outlined />
+        Subir Archivos
+      </a-button>
+    </a-upload>
+  </div>
 </template>
-<script>
-import { message } from 'ant-design-vue';
-import { UploadOutlined } from '@ant-design/icons-vue';
-import { defineComponent, ref } from 'vue';
-export default defineComponent({
-  components: {
-    UploadOutlined,
+
+<script setup>
+import { UploadOutlined } from '@ant-design/icons-vue'
+import { ref } from 'vue'
+
+const title = 'Documentos requeridos'
+const description = 'Subí fotos, PDFs o archivos relevantes'
+const multiple = true
+
+const files = ref([
+  {
+    uid: '1',
+    name: 'archivo1.pdf',
+    status: 'done',
+    url: 'https://example.com/archivo1.pdf',
   },
-  setup() {
-    const handleChange = info => {
-      if (info.file.status !== 'uploading') {
-        console.log(info.file, info.fileList);
-      }
-      if (info.file.status === 'done') {
-        message.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === 'error') {
-        message.error(`${info.file.name} file upload failed.`);
-      }
-    };
-    const fileList = ref([]);
-    return {
-      fileList,
-      headers: {
-        authorization: 'authorization-text',
-      },
-      handleChange,
-    };
+  {
+    uid: '2',
+    name: 'imagen.jpg',
+    status: 'done',
+    url: 'https://example.com/imagen.jpg',
   },
-});
+])
+
+const handleRemove = file => {
+  files.value = files.value.filter(item => item.uid !== file.uid)
+}
+
+const beforeUpload = file => {
+  files.value = [...files.value, file]
+  return false
+}
 </script>
